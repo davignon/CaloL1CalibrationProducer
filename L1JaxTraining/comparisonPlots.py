@@ -89,9 +89,9 @@ parser.add_option("--er",          dest="er",                               defa
 
 # get/create folders
 basedir = "/data_CMS/cms/motta/CaloL1calibraton/"
-olddir = basedir+"/"+options.olddir_name+"/"
-uncdir = basedir+"/"+options.uncdir_name+"/"
-indir = basedir+options.indir
+olddir = options.olddir_name+"/"
+uncdir = options.uncdir_name+"/"
+indir = options.indir
 outdir = indir
 print(" ### INFO: UnCalib dir  = {}".format(uncdir))
 print(" ### INFO: OldCalib dir = {}".format(olddir))
@@ -233,7 +233,6 @@ if options.doResponse == True:
             name = 'EoTot'
 
         for i in range(len(Bins)-1):
-            print(" ### DEBUG ", "pt_resp_"+bins+str(Bins[i])+"to"+str(Bins[i+1]))
             Bins_resp_unCalib = file_unCalib.Get("pt_resp_"+bins+str(Bins[i])+"to"+str(Bins[i+1]))
             Bins_resp_oldCalib = file_oldCalib.Get("pt_resp_"+bins+str(Bins[i])+"to"+str(Bins[i+1]))
             Bins_resp_newCalib = file_newCalib.Get("pt_resp_"+bins+str(Bins[i])+"to"+str(Bins[i+1]))
