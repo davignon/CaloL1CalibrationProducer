@@ -25,8 +25,12 @@ def PlotSF (SF_matrix, bins, odir, v_sample, eta_towers, i_epoch = None):
 
     plt.figure(figsize=(12,10))
     colors = plt.cm.viridis_r(np.linspace(0,1,len(bins)))
+    print(bins)
+    print(eta_towers)
     for i in range(len(bins) - 1):
+        print(i,eta_towers,SF_matrix[i,:])
         plt.plot(eta_towers, SF_matrix[i,:], 'o--', color=colors[i], label = f"{bins[i]} $\leq E_T <$ {bins[i+1]}")
+        #plt.plot(eta_towers, SF_matrix[i,:], 'o--', color=colors[i], label = f"{bins[i]} $\leq E_T <$ {bins[i+1]}")
     plt.xlabel('i$\eta$', fontsize=20)
     plt.ylabel('{} Calibration Constant'.format(v_sample), fontsize=20)
     plt.grid(linestyle='dotted')
@@ -44,8 +48,11 @@ def PlotSF (SF_matrix, bins, odir, v_sample, eta_towers, i_epoch = None):
     
 def PlotSF2D (SF_matrix, odir, et_binning, eta_binning, v_sample, i_epoch = None):
 
+    print(eta_binning)
     eta_axis = [int(x) for x in eta_binning[eta_binning < 29]] + [int(x+1) for x in eta_binning[eta_binning >= 29]]
+    #eta_axis += np.array([40])
     et_axis = ["{}-{}".format(et_binning[i],et_binning[i+1]) for i in range(0,len(et_binning)-1)]
+    #et_axis += np.array([1000])
 
     if i_epoch != None: epoch = '_{}'.format(i_epoch)
     else: epoch = ''
@@ -104,18 +111,43 @@ if __name__ == "__main__" :
     SF_filename = indir + '/ScaleFactors_{}.csv'.format(options.v)
     if options.v == "ECAL": cols = 28
     if options.v == "HCAL": cols = 40
-    ScaleFactors = np.loadtxt(open(SF_filename, "rb"), delimiter=',', usecols=range(0,cols))
-    eta_binning = np.arange(1,cols+1)
+    #cols = 2
+
+
+    et_binning = []
+    eta_binning = []
 
     # Definition of energy bin edges from the header
     with open(SF_filename) as f:
-        header = f.readline().rstrip()
-    header = header.split("[")[1].split("]")[0]
-    et_binning = header.split(',')
-    et_binning = [float(i) for i in et_binning]
-    
-    PlotSF(ScaleFactors, et_binning, odir, options.v, eta_binning)
-    PlotSF2D(ScaleFactors, odir, et_binning, eta_binning, options.v)
+        lines = f.readlines()#.rstrip()
+        i = 0
+        for header in lines:
+            if i==0:
+                header_et = header.split("[")[1].split("]")[0]
+                et_binning = header_et.split(',')
+                et_binning = [float(i) for i in et_binning]
+            if i==3:
+                header_eta = header.split("[")[1].split("]")[0]
+                eta_binning = header_eta.split(',')
+                eta_binning = [float(i) for i in eta_binning]
+            print(header)
+            i = i+1
+
+    print(et_binning)
+    print(eta_binning,len(eta_binning))
+    eta_binning = list(dict.fromkeys(eta_binning))
+
+    ScaleFactors = np.loadtxt(open(SF_filename, "rb"), delimiter=',', usecols=range(0,len(eta_binning)-1))
+    #ScaleFactors = np.loadtxt(open(SF_filename, "rb"), delimiter=',', usecols=range(0,cols))
+    #eta_binning = np.arange(1,cols+1)
+    eta_binningm = eta_binning[:-1]
+    eta_binningm = np.asarray(eta_binningm)
+
+    eta_binning = np.asarray(eta_binning)
+    et_binning2 = et_binning + [256]
+
+    PlotSF(ScaleFactors, et_binning, odir, options.v, eta_binningm)
+    PlotSF2D(ScaleFactors, odir, et_binning2, eta_binning, options.v)
 
     #######################################################
     ################# Loss History plots ##################
